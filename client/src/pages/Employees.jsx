@@ -22,7 +22,7 @@ const Employees = () => {
 
   useEffect(() => {
     fetchEmployees();
-  }, [fetchEmployees])
+  }, [])
 
   const handleDeptChange = (e) => {
     const dept = e.target.value
