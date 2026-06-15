@@ -11,10 +11,20 @@ const Attendance = () => {
   const [isDeleted, setIsDeleted] = useState(false)
 
   const fetchData = useCallback(async () => {
-    setHistory(dummyAttendanceData)
+    /* setHistory(dummyAttendanceData)
     setTimeout(() => {
       setLoading(false)
-    }, 1000)
+    }, 1000) */
+    try{
+      const res = await api.get('/attendance')
+      const json = res.json()
+      setHistory(json.data || [])
+      if (json.employee?.isDeleted) setIsDeleted(true)
+    }catch(error){
+     toast.error(error?.response?.data?.error || error?.message || "Failed to fetch attendance data")
+    }finally{
+      setLoading(false)
+    }
   }, [])
 
   useEffect(() => {

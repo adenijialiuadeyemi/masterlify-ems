@@ -4,19 +4,36 @@ import { PlusIcon, ThermometerIcon, UmbrellaIcon, PalmtreeIcon } from "lucide-re
 import Loading from "../components/Loading"
 import LeaveHistory from "../components/leave/LeaveHistory"
 import ApplyLeaveModal from "../components/leave/ApplyLeaveModal"
+import { useAuth } from "../context/AuthContext";
+import api from "../api/axios"
+import { toast } from "react-hot-toast"
 
 const Leave = () => {
+  const { user } = useAuth();
   const [leaves, setLeaves] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [isDeleted, setIsDeleted] = useState(false);
-  const isAdmin = true;
+  const isAdmin = user?.role === "ADMIN";
 
-  const fetchLeaves = useCallback(() => {
-    setLeaves(dummyLeaveData)
+  const fetchLeaves = useCallback(async () => {
+   /*  setLeaves(dummyLeaveData)
     setTimeout(() => {
       setLoading(false);
-    }, 1000);
+    }, 1000); */
+
+    try{
+      const res = await api.get("/leaves")
+      setLeaves(res.data.data || [])
+      if (res.data.employee?.isDeleted) {
+        setIsDeleted(true);
+      }
+    } catch (error) {
+      console.error("Error fetching leave data:", error);
+      toast.error(error.response?.data?.error || error.message || "Failed to fetch leave data");
+    }finally{
+      setLoading(false)
+    }
   }, [])
 
   useEffect(() => {

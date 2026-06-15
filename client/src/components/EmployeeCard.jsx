@@ -5,7 +5,14 @@ const EmployeeCard = ({ employee, onDelete, onEdit }) => {
 
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this employee?")) return;
-    onDelete(employee)
+    try {
+      await api.delete(`/employees/${employee._id}`);
+      toast.success("Employee deleted successfully");
+      onDelete(employee._id);
+    }catch (error) {
+      console.error("Failed to delete employee:", error);
+      toast.error(error.response?.data?.error || error.message || "Failed to delete employee");
+    }
   }
 
   return (

@@ -5,7 +5,7 @@ import LeaveApplication from "../models/Leave.js";
 import sendEmail from "../config/nodemailer.js";
 
 // Create a client to send and receive events
-export const inngest = new Inngest({ id: "quick-ems" });
+export const inngest = new Inngest({ id: "masterlify-ems" });
 
 // Auto Check-out for employees
 const autoCheckOut = inngest.createFunction(
@@ -151,12 +151,25 @@ const attendanceReminderCron = inngest.createFunction(
         !onLeaveIds.includes(emp._id) && !checkedInIds.includes(emp._id)
     );
 
-    // Step 6: Send reminder emails
+    // Step 6: Send reminder emails to absent employees
     if (absentEmployees.length > 0) {
       await step.run("send-reminder-emails", async () => {
-        const emailPromises = absentEmployees.map((emp) => {
-          // send email
-        });
+        const emailPromises = absentEmployees.map((emp) =>
+          sendEmail({
+            to: emp.email,
+            subject: `Attendance Reminder — Please Mark Your Attendance`,
+            body: `<div style="max-width: 600px; font-family: Arial, sans-serif;">
+              <h2>Hi ${emp.firstName}, 👋</h2>
+              <p style="font-size: 16px;">We noticed you haven't marked your attendance yet today.</p>
+              <p style="font-size: 16px;">The deadline was <strong>11:30 AM</strong> and your attendance is still missing.</p>
+              <p style="font-size: 16px;">Please check in as soon as possible or contact your admin if you're facing any issues.</p>
+              <br />
+              <p style="font-size: 14px; color: #666;">Best Regards,</p>
+              <p style="font-size: 14px; color: #666;">EMS</p>
+            </div>`,
+          })
+        );
+        await Promise.all(emailPromises);
       });
     }
 
@@ -169,7 +182,7 @@ const attendanceReminderCron = inngest.createFunction(
   }
 );
 
-// Create an empty array where we'll export future Inngest functions
+// Export all Inngest functions
 export const functions = [
   autoCheckOut,
   leaveApplicationReminder,
