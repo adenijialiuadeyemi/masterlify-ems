@@ -10,6 +10,7 @@ import leaveRouter from "./routes/leaveRoutes.js"
 import payslipRouter from "./routes/payslipRoutes.js"
 import dashboardRouter from "./routes/dashboardRoutes.js"
 import { inngest, functions } from "./inngest/index.js"
+import { serve } from "inngest/express"
 
 // Initialize app
 const app = express()
