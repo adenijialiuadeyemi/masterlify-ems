@@ -8,9 +8,24 @@ const ChangePasswordModal = ({ open, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    try {
+    setMessage({ type: "", text: "" })  
+   /*  try {
       // TODO: call API with formData
       setMessage({ type: "success", text: "Password updated successfully." })
+    } catch (err) {
+      setMessage({ type: "error", text: err.message || "Something went wrong." })
+    } finally {
+      setLoading(false)
+    } */
+    const formData = new FormData(e.target)
+    const currentPassword = formData.get("currentPassword")
+    const newPassword = formData.get("newPassword")
+
+    try{
+      const {data}= await api.post("/auth/change-password", {currentPassword, newPassword})
+      if (!data.success) throw new Error(data.error || "Failed to change password")
+      setMessage({ type: "success", text: "Password updated successfully." })
+        e.target.reset()
     } catch (err) {
       setMessage({ type: "error", text: err.message || "Something went wrong." })
     } finally {

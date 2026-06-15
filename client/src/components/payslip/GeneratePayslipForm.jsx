@@ -17,7 +17,7 @@ const GeneratePayslipForm = ({ employees, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    try {
+    /* try {
       const formData = new FormData(e.target)
       const data = Object.fromEntries(formData.entries())
       // TODO: call API with data
@@ -27,7 +27,19 @@ const GeneratePayslipForm = ({ employees, onSuccess }) => {
       console.error(err)
     } finally {
       setLoading(false)
-    }
+    } */
+
+      const formData = new FormData(e.target)
+      const data = Object.fromEntries(formData.entries())
+      try{
+        await api.post("/payslips", data)
+        setIsOpen(false)
+        onSuccess()
+      }catch(error){
+        toast.error(error?.response?.data?.error || error?.message || "Failed to generate payslip")
+      }finally{
+        setLoading(false)
+      }
   }
 
   return (

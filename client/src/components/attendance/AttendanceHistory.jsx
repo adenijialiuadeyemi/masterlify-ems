@@ -2,9 +2,19 @@ import { format } from 'date-fns'
 import React from 'react'
 
 const getDayTypeDisplay = (record) => {
-  if (record.dayType === "Full Day") return { label: "Full Day", className: "badge-success" }
-  if (record.dayType === "Half Day") return { label: "Half Day", className: "badge-warning" }
-  return { label: "-", className: "" }
+  if (!record.checkOut) return { label: "-", className: "" }
+  switch (record.dayType) {
+    case "Full Day":
+      return { label: "Full Day", className: "badge-success" }
+    case "Three Quarter Day":
+      return { label: "3/4 Day", className: "badge-success" }
+    case "Half Day":
+      return { label: "Half Day", className: "badge-warning" }
+    case "Short Day":
+      return { label: "Short Day", className: "badge-danger" }
+    default:
+      return { label: "-", className: "" }
+  }
 }
 
 const getWorkingHoursDisplay = (record) => {

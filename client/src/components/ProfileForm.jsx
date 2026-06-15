@@ -11,7 +11,7 @@ const ProfileForm = ({ initialData, onSuccess }) => {
     setLoading(true)
     setError("")
     setMessage("")
-    try {
+    /* try {
       // TODO: call API with FormData
       setMessage("Profile updated successfully.")
       if (onSuccess) onSuccess()
@@ -19,7 +19,17 @@ const ProfileForm = ({ initialData, onSuccess }) => {
       setError(err.message || "Something went wrong.")
     } finally {
       setLoading(false)
-    }
+    } */
+   const formData = new FormData(e.target)
+   try{
+    await api.put("/profile", formData)
+    setMessage("Profile updated successfully.")
+    onSuccess?.()
+   }catch(error){
+    setError(error?.response?.data?.error || error?.message || "Failed to update profile")
+   }finally{
+    setLoading(false)
+   }
   }
 
   return (

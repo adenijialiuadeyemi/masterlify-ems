@@ -3,6 +3,10 @@ import { useParams } from 'react-router-dom'
 import { dummyPayslipData } from '../assets/assets';
 import { format } from 'date-fns';
 import Loading from '../components/Loading';
+import toast from 'react-hot-toast';
+import api from '../api/axios';
+
+
 
 const PrintPayslip = () => {
   const { id } = useParams();
@@ -10,10 +14,19 @@ const PrintPayslip = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setPayslip(dummyPayslipData.find((slip) => slip._id === id))
+    /* setPayslip(dummyPayslipData.find((slip) => slip._id === id))
     setTimeout(() => {
       setLoading(false)
-    }, 1000)
+    }, 1000) */
+
+    api.get(`/payslips/${id}`).then(res => 
+      setPayslip(res.data)
+    ).catch((err) => {
+      console.error(err);
+      toast.error('Failed to fetch payslip');
+    }).finally(() => {
+      setLoading(false)
+    })
   }, [id])
 
   if (loading) return <Loading />

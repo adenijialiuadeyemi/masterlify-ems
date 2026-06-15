@@ -3,6 +3,9 @@ import { dummyPayslipData } from "../assets/assets"
 import GeneratePayslipForm from "../components/payslip/GeneratePayslipForm"
 import PayslipList from "../components/payslip/PayslipList"
 import Loading from "../components/Loading"
+import { useAuth } from "../context/AuthContext"
+import api from "../api/axios"
+import toast from "react-hot-toast"
 
 // Dummy employee data — replace with API call if isAdmin
 const dummyEmployeeData = [
@@ -15,13 +18,22 @@ const Payslips = () => {
   const [payslips, setPayslips] = useState([])
   const [employees, setEmployees] = useState([])
   const [loading, setLoading] = useState(true)
-  const isAdmin = false
+  const {user} = useAuth()
+  const isAdmin = user?.role === "admin"
 
   const fetchPayslips = useCallback(async () => {
-    setPayslips(dummyPayslipData)
+   /*  setPayslips(dummyPayslipData)
     setTimeout(() => {
       setLoading(false)
-    }, 1000)
+    }, 1000) */
+    try{
+      const res = await api.get('/payslips')
+      setPayslips(res.data.data || [])
+    }catch(error){
+      toast.error(error?.response?.data?.error || error?.message || "Failed to fetch payslips")
+    }finally{
+      setLoading(false)
+    }
   }, [])
 
   useEffect(() => {
@@ -29,7 +41,9 @@ const Payslips = () => {
   }, [fetchPayslips])
 
   useEffect(() => {
-    if (isAdmin) setEmployees(dummyEmployeeData)
+    /* if (isAdmin) setEmployees(dummyEmployeeData) */
+    if (isAdmin)  api.get('/employees').then(res => 
+      setEmployees(res.data.filter((e)=> !e.isDeleted))).catch(()=>{})
   }, [isAdmin])
 
   if (loading) return <Loading />
