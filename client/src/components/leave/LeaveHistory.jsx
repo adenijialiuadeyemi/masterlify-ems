@@ -1,12 +1,23 @@
 import { format } from 'date-fns'
 import { CheckIcon, Loader2Icon, XIcon } from 'lucide-react'
 import React, { useState } from 'react'
+import { toast } from 'react-hot-toast'
+import api from '../../api/axios'
 
 const LeaveHistory = ({ leaves, isAdmin, onUpdate }) => {
   const [processing, setProcessing] = useState(null)
 
-  const handleStatusUpdate = (id) => {
+  const handleStatusUpdate = async (id, status) => {
     setProcessing(id)
+    try {
+      await api.patch(`/leaves/${id}`, { status })
+      toast.success(`Leave ${status.toLowerCase()} successfully`)
+      onUpdate()
+    } catch (error) {
+      toast.error(error.response?.data?.error || error.message || "Failed to update leave status")
+    } finally {
+      setProcessing(null)
+    }
   }
 
   return (
@@ -32,8 +43,9 @@ const LeaveHistory = ({ leaves, isAdmin, onUpdate }) => {
               </tr>
             ) : (
               leaves.map((leave) => {
+                const leaveId = leave._id || leave.id
                 return (
-                  <tr key={leave._id || leave.id}>
+                  <tr key={leaveId}>
                     {isAdmin && (
                       <td className='text-slate-900'>
                         {leave.employee?.firstName} {leave.employee?.lastName}
@@ -72,18 +84,20 @@ const LeaveHistory = ({ leaves, isAdmin, onUpdate }) => {
                           <div className='flex justify-center gap-2'>
                             <button
                               disabled={!!processing}
-                              onClick={() => handleStatusUpdate(leave._id || leave.id, "APPROVED")}
+                              onClick={() => handleStatusUpdate(leaveId, "APPROVED")}
                               className='p-1.5 rounded-md bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors'
                             >
-                              {processing === (leave._id || leave.id)
+                              {processing === leaveId
                                 ? <Loader2Icon className="w-4 h-4 animate-spin" />
                                 : <CheckIcon className="w-4 h-4" />}
                             </button>
 
                             <button
+                              disabled={!!processing}
+                              onClick={() => handleStatusUpdate(leaveId, "REJECTED")}
                               className='p-1.5 rounded-md bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors'
                             >
-                              {processing === (leave._id || leave.id)
+                              {processing === leaveId
                                 ? <Loader2Icon className="w-4 h-4 animate-spin" />
                                 : <XIcon className="w-4 h-4" />}
                             </button>

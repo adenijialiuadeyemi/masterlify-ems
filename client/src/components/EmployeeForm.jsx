@@ -1,6 +1,8 @@
 import { Loader2Icon } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-hot-toast'
+import api from '../api/axios'
 
 const DEPARTMENTS = [
   "Engineering",
@@ -20,6 +22,22 @@ const EmployeeForm = ({ initialData, onSuccess, onCancel }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setLoading(true)
+    const formData = new FormData(e.target)
+    if (isEditMode) {
+      const pwd = formData.get("password")
+      if (!pwd) formData.delete("password") // Remove password if not provided
+    }
+    try{
+      const url = isEditMode ? `/employees/${initialData._id}` : "/employees"
+      const method = isEditMode ? "put" : "post"
+      await api[method](url, formData)
+      onSuccess ? onSuccess() : navigate("/employees")
+    } catch (error) {
+      toast.error(error.response?.data?.error || error?.message || "Failed to save employee"  )
+    }finally{
+      setLoading(false)
+    }
   }
 
   return (

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeftIcon,
   EyeIcon,
@@ -7,6 +7,8 @@ import {
   Loader2Icon,
 } from "lucide-react";
 import LoginLeftSide from "./LoginLeftSide";
+import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 const LoginForm = ({ title = "Login", subtitle = "Access your portal securely" }) => {
   const [email, setEmail] = useState("");
@@ -14,19 +16,24 @@ const LoginForm = ({ title = "Login", subtitle = "Access your portal securely" }
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState("EMPLOYEE");
+
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError("Please fill in all fields.");
-      return;
-    }
     setError("");
     setLoading(true);
-    setTimeout(() => {
+    try {
+      await login(email, password, role);
+      navigate("/dashboard");
+    } catch (error) {
+      toast.error(error.response?.data?.error || error.message || "Login failed");
+    } finally {
       setLoading(false);
-      console.log("Login submitted:", { email, password });
-    }, 1500);
+    }
   };
 
   return (
