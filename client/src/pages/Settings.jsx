@@ -6,15 +6,25 @@ import ProfileForm from "../components/ProfileForm"
 import ChangePasswordModal from "../components/ChangePasswordModal"
 
 const Settings = () => {
+  const {user} = useAuth()
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showPasswordModal, setShowPasswordModal] = useState(false)
 
   const fetchProfile = async () => {
-    setProfile(dummyProfileData)
+   /*  setProfile(dummyProfileData)
     setTimeout(() => {
       setLoading(false)
-    }, 1000)
+    }, 1000) */
+  try{
+    const res = await api.get("/profile")
+    const profile = res.data
+    if (profile) setProfile(profile)
+  }catch(error){
+    toast.error(error?.response?.data?.error || error?.message || "Failed to fetch profile")
+  }finally{
+    setLoading(false)
+  }
   }
 
   useEffect(() => {

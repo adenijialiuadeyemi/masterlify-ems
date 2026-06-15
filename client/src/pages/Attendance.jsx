@@ -4,6 +4,8 @@ import Loading from "../components/Loading"
 import CheckInButton from "../components/attendance/CheckInButton"
 import AttendanceStats from "../components/attendance/AttendanceStats"
 import AttendanceHistory from "../components/attendance/AttendanceHistory"
+import toast from "react-hot-toast"
+import api from "../api/axios"
 
 const Attendance = () => {
   const [history, setHistory] = useState([])
@@ -15,17 +17,17 @@ const Attendance = () => {
     setTimeout(() => {
       setLoading(false)
     }, 1000) */
-    try{
-      const res = await api.get('/attendance')
-      const json = res.json()
-      setHistory(json.data || [])
-      if (json.employee?.isDeleted) setIsDeleted(true)
-    }catch(error){
-     toast.error(error?.response?.data?.error || error?.message || "Failed to fetch attendance data")
-    }finally{
-      setLoading(false)
-    }
-  }, [])
+    try {
+    const res = await api.get('/attendance')
+    const json = res.data  // ← axios uses .data, not .json()
+    setHistory(json.data || [])
+    if (json.employee?.isDeleted) setIsDeleted(true)
+  } catch (error) {
+    toast.error(error?.response?.data?.error || error?.message || "Failed to fetch attendance data")
+  } finally {
+    setLoading(false)
+  }
+}, [])
 
   useEffect(() => {
     fetchData()
