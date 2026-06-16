@@ -1,10 +1,31 @@
-import React from 'react'
-import { Download } from 'lucide-react'
-import { format } from 'date-fns'
+import { DownloadIcon } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
-const PayslipList = ({ payslips, isAdmin }) => {
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+]
+
+const formatCurrency = (amount) =>
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount || 0)
+
+const getPeriod = (payslip) => {
+  if (!payslip.month || !payslip.year) return "—"
+  const month = MONTHS[(payslip.month || 1) - 1]
+  return `${month} ${payslip.year}`
+}
+
+const getEmployeeName = (payslip) => {
+  const emp = payslip.employee || payslip.employeeId
+  if (!emp) return "—"
+  return `${emp.firstName || ""} ${emp.lastName || ""}`.trim()
+}
+
+const PayslipList = ({ payslips, isAdmin, onUpdate }) => {
+  const navigate = useNavigate()
+
   return (
-    <div className='card overflow-hidden'>
+    <div className="card overflow-hidden">
       <div className="overflow-x-auto">
         <table className="table-modern">
           <thead>
@@ -13,50 +34,42 @@ const PayslipList = ({ payslips, isAdmin }) => {
               <th>Period</th>
               <th>Basic Salary</th>
               <th>Net Salary</th>
-              <th className='text-center'>Actions</th>
+              <th className="text-center">Action</th>
             </tr>
           </thead>
           <tbody>
             {payslips.length === 0 ? (
               <tr>
-                <td
-                  colSpan={isAdmin ? 5 : 4}
-                  className="text-center py-12 text-slate-400"
-                >
+                <td colSpan={isAdmin ? 5 : 4} className="text-center py-12 text-slate-400">
                   No payslips found
                 </td>
               </tr>
             ) : (
               payslips.map((payslip) => {
+                const payslipId = payslip._id || payslip.id
                 return (
-                  <tr key={payslip._id || payslip.id}>
+                  <tr key={payslipId}>
                     {isAdmin && (
-                      <td className='text-slate-900'>
-                        {payslip.employee?.firstName}{' '}
-                        {payslip.employee?.lastName}
+                      <td className="font-medium text-slate-900">
+                        {getEmployeeName(payslip)}
                       </td>
                     )}
-
-                    <td className='text-slate-500'>
-                      {format(new Date(payslip.year, payslip.month - 1), 'MMMM yyyy')}
+                    <td className="text-slate-500">
+                      {getPeriod(payslip)}
                     </td>
-
-                    <td className='text-slate-500'>
-                      ${payslip.basicSalary?.toLocaleString()}
+                    <td className="text-slate-600">
+                      {formatCurrency(payslip.basicSalary)}
                     </td>
-
-                    <td className='font-medium text-slate-800'>
-                      ${payslip.netSalary?.toLocaleString()}
+                    <td className="font-semibold text-slate-900">
+                      {formatCurrency(payslip.netSalary)}
                     </td>
-
-                    <td className='text-center'>
+                    <td className="text-center">
                       <button
-                        onClick={() =>
-                          window.open(`/print/payslips/${payslip._id || payslip.id}`)
-                        }
-                        className='inline-flex items-center px-3 py-1.5 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors ring-1 ring-blue-600/10'
+                        onClick={() => navigate(`/payslips/${payslipId}`)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
                       >
-                        <Download className="w-3 h-3 mr-1.5" /> Download
+                        <DownloadIcon className="w-3.5 h-3.5" />
+                        Download
                       </button>
                     </td>
                   </tr>

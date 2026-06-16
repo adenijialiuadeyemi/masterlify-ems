@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import { Lock as LockIcon, X, Loader2 as Loader2Icon } from 'lucide-react'
+import api from '../api/axios'
+import toast from 'react-hot-toast'
 
 const ChangePasswordModal = ({ open, onClose }) => {
   const [loading, setLoading] = useState(false)
