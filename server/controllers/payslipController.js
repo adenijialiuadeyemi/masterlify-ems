@@ -78,13 +78,25 @@ export const getPayslipById = async (req, res) => {
 
     if (!payslip) return res.status(404).json({ error: "Not found" });
 
+    const emp = payslip.employeeId;
+
     const result = {
       ...payslip,
       id: payslip._id.toString(),
-      employee: payslip.employeeId,
+      employeeId: emp?._id?.toString(),
+      employee: emp
+        ? {
+            _id: emp._id.toString(),
+            firstName: emp.firstName,
+            lastName: emp.lastName,
+            email: emp.email,
+            position: emp.position,
+            department: emp.department,
+          }
+        : null,
     };
 
-    return res.json({data:result});
+    return res.json({ data: result });
   } catch (error) {
     return res.status(500).json({ error: "Failed" });
   }
