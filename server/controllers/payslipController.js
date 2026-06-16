@@ -11,6 +11,10 @@ export const createPayslip = async (req, res) => {
       return res.status(400).json({ error: "Missing fields" });
     }
 
+    // Check employee exists
+    const employee = await Employee.findById(employeeId);
+    if (!employee) return res.status(404).json({ error: "Employee not found" });
+
     const netSalary =
       Number(basicSalary) + Number(allowances || 0) - Number(deductions || 0);
 
@@ -26,6 +30,7 @@ export const createPayslip = async (req, res) => {
 
     return res.json({ success: true, data: payslip });
   } catch (error) {
+    console.error("Create payslip error:", error);
     return res.status(500).json({ error: "Failed" });
   }
 };
@@ -55,15 +60,32 @@ export const getPayslips = async (req, res) => {
       return res.json({ data });
     } else {
       const employee = await Employee.findOne({ userId: session.userId });
-      if (!employee) return res.status(404).json({ error: "Not found" });
+      if (!employee) return res.status(404).json({ error: "Employee not found" });
 
-      const payslips = await Payslip.find({ employeeId: employee._id }).sort({
-        createdAt: -1,
+      const payslips = await Payslip.find({ employeeId: employee._id })
+        .sort({ createdAt: -1 });
+
+      // Map to include employee info for each payslip
+      const data = payslips.map((p) => {
+        const obj = p.toObject();
+        return {
+          ...obj,
+          id: obj._id.toString(),
+          employee: {
+            _id: employee._id.toString(),
+            firstName: employee.firstName,
+            lastName: employee.lastName,
+            email: employee.email,
+            position: employee.position,
+            department: employee.department,
+          },
+        };
       });
 
-      return res.json({ data: payslips });
+      return res.json({ data });
     }
   } catch (error) {
+    console.error("Get payslips error:", error);
     return res.status(500).json({ error: "Failed" });
   }
 };
@@ -98,6 +120,7 @@ export const getPayslipById = async (req, res) => {
 
     return res.json({ data: result });
   } catch (error) {
+    console.error("Get payslip by ID error:", error);
     return res.status(500).json({ error: "Failed" });
   }
 };

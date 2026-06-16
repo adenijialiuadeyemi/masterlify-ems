@@ -11,8 +11,7 @@ const formatCurrency = (amount) =>
 
 const getPeriod = (payslip) => {
   if (!payslip.month || !payslip.year) return "—"
-  const month = MONTHS[(payslip.month || 1) - 1]
-  return `${month} ${payslip.year}`
+  return `${MONTHS[(payslip.month || 1) - 1]} ${payslip.year}`
 }
 
 const getEmployeeName = (payslip) => {

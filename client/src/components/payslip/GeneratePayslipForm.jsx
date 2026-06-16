@@ -2,6 +2,22 @@ import { Plus, X, Loader2 } from 'lucide-react'
 import React, { useState } from 'react'
 import toast from 'react-hot-toast'
 import api from '../../api/axios'
+
+const MONTHS = [
+  { value: 1, label: "January" },
+  { value: 2, label: "February" },
+  { value: 3, label: "March" },
+  { value: 4, label: "April" },
+  { value: 5, label: "May" },
+  { value: 6, label: "June" },
+  { value: 7, label: "July" },
+  { value: 8, label: "August" },
+  { value: 9, label: "September" },
+  { value: 10, label: "October" },
+  { value: 11, label: "November" },
+  { value: 12, label: "December" },
+]
+
 const GeneratePayslipForm = ({ employees, onSuccess }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -18,29 +34,18 @@ const GeneratePayslipForm = ({ employees, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    /* try {
-      const formData = new FormData(e.target)
-      const data = Object.fromEntries(formData.entries())
-      // TODO: call API with data
-      if (onSuccess) onSuccess()
+    const formData = new FormData(e.target)
+    const data = Object.fromEntries(formData.entries())
+    try {
+      await api.post("/payslips", data)
+      toast.success("Payslip generated successfully")
       setIsOpen(false)
-    } catch (err) {
-      console.error(err)
+      onSuccess()
+    } catch (error) {
+      toast.error(error?.response?.data?.error || error?.message || "Failed to generate payslip")
     } finally {
       setLoading(false)
-    } */
-
-      const formData = new FormData(e.target)
-      const data = Object.fromEntries(formData.entries())
-      try{
-        await api.post("/payslips", data)
-        setIsOpen(false)
-        onSuccess()
-      }catch(error){
-        toast.error(error?.response?.data?.error || error?.message || "Failed to generate payslip")
-      }finally{
-        setLoading(false)
-      }
+    }
   }
 
   return (
@@ -64,9 +69,10 @@ const GeneratePayslipForm = ({ employees, onSuccess }) => {
               Employee
             </label>
             <select name="employeeId" required>
+              <option value="">Select Employee</option>
               {employees.map((e) => (
-                <option key={e.id} value={e.id}>
-                  {e.firstName} {e.lastName} ({e.position})
+                <option key={e._id || e.id} value={e._id || e.id}>
+                  {e.firstName} {e.lastName} {e.position ? `(${e.position})` : ""}
                 </option>
               ))}
             </select>
@@ -78,10 +84,10 @@ const GeneratePayslipForm = ({ employees, onSuccess }) => {
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 Month
               </label>
-              <select name="month">
-                {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                  <option key={m} value={m}>
-                    {m}
+              <select name="month" defaultValue={new Date().getMonth() + 1}>
+                {MONTHS.map((m) => (
+                  <option key={m.value} value={m.value}>
+                    {m.label}
                   </option>
                 ))}
               </select>
@@ -93,6 +99,7 @@ const GeneratePayslipForm = ({ employees, onSuccess }) => {
               <input
                 type="number"
                 name="year"
+                required
                 defaultValue={new Date().getFullYear()}
               />
             </div>
@@ -107,6 +114,7 @@ const GeneratePayslipForm = ({ employees, onSuccess }) => {
               type="number"
               name="basicSalary"
               required
+              min="0"
               placeholder="5000"
             />
           </div>
@@ -120,6 +128,7 @@ const GeneratePayslipForm = ({ employees, onSuccess }) => {
               <input
                 type="number"
                 name="allowances"
+                min="0"
                 defaultValue="0"
               />
             </div>
@@ -130,6 +139,7 @@ const GeneratePayslipForm = ({ employees, onSuccess }) => {
               <input
                 type="number"
                 name="deductions"
+                min="0"
                 defaultValue="0"
               />
             </div>
