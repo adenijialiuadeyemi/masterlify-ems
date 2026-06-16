@@ -1,5 +1,4 @@
 import { useCallback, useState, useEffect } from "react"
-import { dummyPayslipData } from "../assets/assets"
 import GeneratePayslipForm from "../components/payslip/GeneratePayslipForm"
 import PayslipList from "../components/payslip/PayslipList"
 import Loading from "../components/Loading"
@@ -7,31 +6,20 @@ import { useAuth } from "../context/AuthContext"
 import api from "../api/axios"
 import toast from "react-hot-toast"
 
-// Dummy employee data — replace with API call if isAdmin
-const dummyEmployeeData = [
-  { id: '1', firstName: 'David', lastName: 'Michael', position: 'Engineer' },
-  { id: '2', firstName: 'Alex', lastName: 'Matthew', position: 'Designer' },
-  { id: '3', firstName: 'John', lastName: 'Doe', position: 'Manager' },
-]
-
 const Payslips = () => {
   const [payslips, setPayslips] = useState([])
   const [employees, setEmployees] = useState([])
   const [loading, setLoading] = useState(true)
-  const {user} = useAuth()
-  const isAdmin = user?.role === "admin"
+  const { user } = useAuth()
+  const isAdmin = user?.role === "ADMIN"
 
   const fetchPayslips = useCallback(async () => {
-   /*  setPayslips(dummyPayslipData)
-    setTimeout(() => {
-      setLoading(false)
-    }, 1000) */
-    try{
+    try {
       const res = await api.get('/payslips')
       setPayslips(res.data.data || [])
-    }catch(error){
+    } catch (error) {
       toast.error(error?.response?.data?.error || error?.message || "Failed to fetch payslips")
-    }finally{
+    } finally {
       setLoading(false)
     }
   }, [])
@@ -41,9 +29,11 @@ const Payslips = () => {
   }, [fetchPayslips])
 
   useEffect(() => {
-    /* if (isAdmin) setEmployees(dummyEmployeeData) */
-    if (isAdmin)  api.get('/employees').then(res => 
-      setEmployees(res.data.filter((e)=> !e.isDeleted))).catch(()=>{})
+    if (isAdmin) {
+      api.get('/employees')
+        .then(res => setEmployees(res.data.filter((e) => !e.isDeleted)))
+        .catch(() => {})
+    }
   }, [isAdmin])
 
   if (loading) return <Loading />
@@ -64,7 +54,7 @@ const Payslips = () => {
           />
         )}
       </div>
-      <PayslipList payslips={payslips} isAdmin={isAdmin} />
+      <PayslipList payslips={payslips} isAdmin={isAdmin} onUpdate={fetchPayslips} />
     </div>
   )
 }
