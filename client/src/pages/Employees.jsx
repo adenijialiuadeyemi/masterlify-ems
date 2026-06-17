@@ -1,50 +1,56 @@
-import { useCallback, useEffect, useState } from "react"
-import { dummyEmployeeData } from "../assets/assets"
-import { Plus, Search, X } from "lucide-react"
-import EmployeeCard from "../components/EmployeeCard"
-import EmployeeForm from "../components/EmployeeForm"
-import api from "../api/axios"
+import { useCallback, useEffect, useState } from "react";
+import { dummyEmployeeData } from "../assets/assets";
+import { Plus, Search, X } from "lucide-react";
+import EmployeeCard from "../components/EmployeeCard";
+import EmployeeForm from "../components/EmployeeForm";
+import api from "../api/axios";
 
 const Employees = () => {
-  const [employees, setEmployees] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [selectedDept, setSelectedDept] = useState("")
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [editEmployee, setEditEmployee] = useState(null)
+  const [selectedDept, setSelectedDept] = useState("");
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editEmployee, setEditEmployee] = useState(null);
 
-  const fetchEmployees = useCallback(async (dept = selectedDept) => {
-   try {
-     setLoading(true)
-     const url = dept ? `/employees?department=${dept}` : "/employees"
-     const res = await api.get(url)
-     setEmployees(res.data)
-   } catch (error) {
-     console.error("Failed to fetch employees:", error)
-   } finally {
-      setLoading(false)
-   }
-  }, [selectedDept])
+  const fetchEmployees = useCallback(
+    async (dept = selectedDept) => {
+      try {
+        setLoading(true);
+        const url = dept ? `/employees?department=${dept}` : "/employees";
+        const res = await api.get(url);
+        setEmployees(res.data);
+      } catch (error) {
+        console.error("Failed to fetch employees:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [selectedDept],
+  );
 
   useEffect(() => {
     fetchEmployees();
-  }, [fetchEmployees])
+  }, [fetchEmployees]);
 
   const handleDeptChange = (e) => {
-    const dept = e.target.value
-    setSelectedDept(dept)
-    fetchEmployees(dept)
-  }
+    const dept = e.target.value;
+    setSelectedDept(dept);
+    fetchEmployees(dept);
+  };
 
   const filtered = employees.filter((emp) =>
-    `${emp.firstName} ${emp.lastName} ${emp.position}`.toLowerCase().includes(search.toLowerCase())
-  )
+    `${emp.firstName} ${emp.lastName} ${emp.position}`
+      .toLowerCase()
+      .includes(search.toLowerCase()),
+  );
 
-  const departments = [...new Set(dummyEmployeeData.map((e) => e.department).filter(Boolean))]
+  const departments = [
+    ...new Set(dummyEmployeeData.map((e) => e.department).filter(Boolean)),
+  ];
 
   return (
     <div className="animate-fade-in">
-
       {/* Header */}
       <div className="page-header flex items-start justify-between">
         <div>
@@ -77,7 +83,9 @@ const Employees = () => {
         >
           <option value="">All Departments</option>
           {departments.map((d) => (
-            <option key={d} value={d}>{d}</option>
+            <option key={d} value={d}>
+              {d}
+            </option>
           ))}
         </select>
       </div>
@@ -96,9 +104,11 @@ const Employees = () => {
           ) : (
             filtered.map((emp) => (
               <EmployeeCard
-                key={emp.id}
+                key={emp._id}
                 employee={emp}
-                onDelete={fetchEmployees}
+                onDelete={(id) =>
+                  setEmployees((prev) => prev.filter((e) => e._id !== id))
+                }
                 onEdit={(e) => setEditEmployee(e)}
               />
             ))
@@ -119,8 +129,12 @@ const Employees = () => {
           >
             <div className="flex items-center justify-between p-6 pb-0">
               <div>
-                <h2 className="text-lg font-semibold text-slate-900">Add Employee</h2>
-                <p className="text-sm text-slate-500 mt-0.5">Create a new employee record</p>
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Add Employee
+                </h2>
+                <p className="text-sm text-slate-500 mt-0.5">
+                  Create a new employee record
+                </p>
               </div>
               <button
                 onClick={() => setShowCreateModal(false)}
@@ -131,7 +145,10 @@ const Employees = () => {
             </div>
             <div className="p-6">
               <EmployeeForm
-                onSuccess={() => { setShowCreateModal(false); fetchEmployees(); }}
+                onSuccess={() => {
+                  setShowCreateModal(false);
+                  fetchEmployees();
+                }}
                 onCancel={() => setShowCreateModal(false)}
               />
             </div>
@@ -151,8 +168,12 @@ const Employees = () => {
           >
             <div className="flex items-center justify-between p-6 pb-0">
               <div>
-                <h2 className="text-lg font-semibold text-slate-900">Edit Employee</h2>
-                <p className="text-sm text-slate-500 mt-0.5">Update employee details</p>
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Edit Employee
+                </h2>
+                <p className="text-sm text-slate-500 mt-0.5">
+                  Update employee details
+                </p>
               </div>
               <button
                 onClick={() => setEditEmployee(null)}
@@ -164,16 +185,18 @@ const Employees = () => {
             <div className="p-6">
               <EmployeeForm
                 initialData={editEmployee}
-                onSuccess={() => { setEditEmployee(null); fetchEmployees(); }}
+                onSuccess={() => {
+                  setEditEmployee(null);
+                  fetchEmployees();
+                }}
                 onCancel={() => setEditEmployee(null)}
               />
             </div>
           </div>
         </div>
       )}
-
     </div>
-  )
-}
+  );
+};
 
-export default Employees
+export default Employees;

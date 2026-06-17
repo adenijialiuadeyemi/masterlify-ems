@@ -143,16 +143,24 @@ export const deleteEmployee = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Find employee by ID
     const employee = await Employee.findById(id);
-    if (!employee) return res.status(404).json({ error: "Employee not found" });
+    if (!employee) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
 
-    employee.isDeleted = true;
-    employee.employmentStatus = "INACTIVE";
-    await employee.save();
+    // Delete the employee record
+    await Employee.findByIdAndDelete(id);
 
-    return res.json({ success: true });
+    // Optionally also delete the linked user account
+    if (employee.userId) {
+      await User.findByIdAndDelete(employee.userId);
+    }
+
+    return res.json({ success: true, message: "Employee deleted successfully" });
   } catch (error) {
     console.error("Delete employee error:", error);
     return res.status(500).json({ error: "Failed to delete employee" });
   }
 };
+
