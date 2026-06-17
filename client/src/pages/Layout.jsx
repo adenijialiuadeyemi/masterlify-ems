@@ -1,24 +1,32 @@
-import React from "react";
-import Sidebar from "../components/Sidebar";
-import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import Loading from "../components/Loading";
+import React, { useState } from 'react'
+import { Outlet } from 'react-router-dom'
+import Sidebar from '../components/Sidebar'
 
 const Layout = () => {
-   const { user, loading } = useAuth();
-
-  if (loading) return <Loading />;
-  if (!user) return <Navigate to="/login" />;
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
+    <div className="flex h-screen bg-slate-50 overflow-hidden">
+      {/* Sidebar */}
       <Sidebar />
-      <main className="flex-1 overflow-y-auto">
-        <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
-          <Outlet />
-        </div>
-      </main>
-    </div>
-  );
-};
 
-export default Layout;
+      {/* Main content area */}
+      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+
+        {/* Mobile top navbar */}
+        <div className="lg:hidden flex items-center gap-3 px-4 py-3 bg-white border-b border-slate-200 shadow-sm">
+          {/* Hamburger rendered inside Sidebar, so we just add spacing here */}
+          <div className="w-9 h-9" /> {/* spacer for hamburger button */}
+          <div>
+            <p className="font-semibold text-sm text-slate-800">Employee MS</p>
+          </div>
+        </div>
+
+        {/* Page content */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  )
+}
+
+export default Layout

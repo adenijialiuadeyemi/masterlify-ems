@@ -1,4 +1,5 @@
 import Employee from "../models/Employee.js";
+import User from "../models/User.js";
 
 // GET /api/profile
 export const getProfile = async (req, res) => {
@@ -7,10 +8,14 @@ export const getProfile = async (req, res) => {
     const employee = await Employee.findOne({ userId: session.userId });
 
     if (!employee) {
-      // Authenticated user is not an employee - return admin profile
+      // Admin — return user record
+      const user = await User.findById(session.userId).lean();
       return res.json({
         firstName: "Admin",
         lastName: "",
+        email: user?.email || "",
+        bio: user?.bio || "",
+        role: "ADMIN",
       });
     }
 
@@ -29,7 +34,16 @@ export const updateProfile = async (req, res) => {
     const employee = await Employee.findOne({ userId: session.userId });
 
     if (!employee) {
-      return res.status(404).json({ error: "Employee not found" });
+      // Admin — update bio on User model
+      if (session.role !== "ADMIN") {
+        return res.status(404).json({ error: "Employee not found" });
+      }
+
+      await User.findByIdAndUpdate(session.userId, {
+        bio: req.body.bio,
+      });
+
+      return res.json({ success: true });
     }
 
     if (employee.isDeleted) {

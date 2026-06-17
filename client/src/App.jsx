@@ -51,7 +51,7 @@ const App = () => {
       </Route>
 
       {/* Dynamic payslip printing */}
-      <Route path="/print/payslips/:id" element={<PrintPayslip />} />
+     <Route path="/payslips/:id" element={<PrintPayslip />} />
 
       {/* Fallback redirect */}
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
