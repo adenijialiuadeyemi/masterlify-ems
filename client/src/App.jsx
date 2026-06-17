@@ -17,6 +17,10 @@ const App = () => {
   <>
     <Toaster />
     <Routes>
+
+      {/* Default root route */}
+  <Route path="/" element={<LoginLanding />} />
+
       {/* Public login routes */}
       <Route path="/login" element={<LoginLanding />} />
       <Route
@@ -54,7 +58,7 @@ const App = () => {
      <Route path="/payslips/:id" element={<PrintPayslip />} />
 
       {/* Fallback redirect */}
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   </>
 );

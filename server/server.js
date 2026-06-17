@@ -11,10 +11,13 @@ import payslipRouter from "./routes/payslipRoutes.js"
 import dashboardRouter from "./routes/dashboardRoutes.js"
 import { inngest, functions } from "./inngest/index.js"
 import { serve } from "inngest/express"
+import job from "./config/cron.js"
 
 // Initialize app
 const app = express()
 const PORT = process.env.PORT || 4000
+
+job.start(); // Start the cron job to keep the server awake on platforms like Render.com
 
 // Middleware
 app.use(cors())
